@@ -2,13 +2,16 @@
 
 namespace app\controllers;
 
+use app\models\User;
 use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
+use app\models\SignupForm;
 use app\models\ContactForm;
+use yii\widgets\ActiveForm;
 
 class SiteController extends Controller
 {
@@ -124,5 +127,29 @@ class SiteController extends Controller
     public function actionAbout()
     {
         return $this->render('about');
+    }
+    public function actionPolicy()
+    {
+        return $this->render('policy');
+    }
+    public function actionSignup()
+    {
+        $model = new SignupForm();
+        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+
+        if ($model->load(Yii::$app->request->post())) {
+            $hash = Yii::$app->getSecurity()->generatePasswordHash($model->password);
+            $user = new User();
+            $user->addUser($model->name,$model->email,$hash);
+            return $this->redirect(array('login'));
+        }
+
+        return $this->render('signup', [
+            'model' => $model,
+        ]);
+
     }
 }
