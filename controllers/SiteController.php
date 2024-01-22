@@ -140,6 +140,11 @@ class SiteController extends Controller
             return ActiveForm::validate($model);
         }
 
+        if (Yii::$app->request->isAjax && $model->load(Yii::$app->request->post())) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);
+        }
+
         if ($model->load(Yii::$app->request->post())) {
             $hash = Yii::$app->getSecurity()->generatePasswordHash($model->password);
             $user = new User();
